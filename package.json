@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@alpacahq/alpaca-trade-api": "^3.0.1",
+    "axios": "^1.7.2"
+  }
+}
