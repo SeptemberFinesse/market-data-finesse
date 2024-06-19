@@ -18,7 +18,7 @@ const StockSearch = () => {
     };
 
     try {
-      const response = await axios.get(`https://data.alpaca.markets/v2/stocks/${ticker}/trades/latest`, options);
+      const response = await axios.get(`https://data.alpaca.markets/v2/stocks/${ticker}/snapshot`, options);
       setStockData(response.data);
       setError('');
     } catch (err) {
@@ -33,7 +33,6 @@ const StockSearch = () => {
     }
   };
   console.log(stockData)
-
   return (
     <div>
       <h1>Stock Search</h1>
@@ -49,7 +48,14 @@ const StockSearch = () => {
         <div>
           <h2>Stock Data</h2>
           <p>Symbol: {stockData.symbol}</p>
-          <p>Last Trade Price: {stockData.trade.p}</p>
+          <p>Last Trade Price: {stockData.latestTrade.p}</p>
+          <p>Open Price: {stockData.dailyBar.o}</p>
+          <p>High Price: {stockData.dailyBar.h}</p>
+          <p>Low Price: {stockData.dailyBar.l}</p>
+          <p>Close Price: {stockData.dailyBar.c}</p>
+          <p>Volume: {stockData.dailyBar.v}</p>
+          <p>VWAP: {stockData.dailyBar.vw}</p>
+          <p>Percent Change: {(((stockData.latestTrade.p - stockData.dailyBar.o) / stockData.dailyBar.o) * 100).toFixed(2)}%</p>
         </div>
       )}
     </div>
