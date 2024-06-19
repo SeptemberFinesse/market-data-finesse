@@ -1,11 +1,15 @@
 // src/StockSearch.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { setStockData, setError } from './redux/actions';
+import './StockSearch.css';
 
 const StockSearch = () => {
   const [symbol, setSymbol] = useState('');
-  const [stockData, setStockData] = useState(null);
-  const [error, setError] = useState('');
+  const dispatch = useDispatch();
+  const stockData = useSelector((state) => state.stock.stockData);
+  const error = useSelector((state) => state.stock.error);
 
   const fetchStockData = async (ticker) => {
     const options = {
@@ -19,11 +23,9 @@ const StockSearch = () => {
 
     try {
       const response = await axios.get(`https://data.alpaca.markets/v2/stocks/${ticker}/snapshot`, options);
-      setStockData(response.data);
-      setError('');
+      dispatch(setStockData(response.data));
     } catch (err) {
-      setError('Failed to fetch data. Please try again.');
-      setStockData(null);
+      dispatch(setError('Failed to fetch data. Please try again.'));
     }
   };
 
@@ -32,30 +34,91 @@ const StockSearch = () => {
       fetchStockData(symbol);
     }
   };
-  console.log(stockData)
+
+  const formatNumber = (num) => {
+    if (num === null || num === undefined) return '-';
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const getLastPriceColor = (percentChange) => {
+    if (percentChange > 0) return 'green';
+    if (percentChange < 0) return 'red';
+    return 'grey';
+  };
+
+  const percentChange = stockData ? ((stockData.latestTrade.p - stockData.dailyBar.o) / stockData.dailyBar.o) : 0;
+  const lastPriceColor = getLastPriceColor(percentChange);
+
   return (
-    <div>
+    <div className="container">
       <h1>Stock Search</h1>
-      <input
-        type="text"
-        value={symbol}
-        onChange={(e) => setSymbol(e.target.value)}
-        placeholder="Enter stock symbol"
-      />
-      <button onClick={handleSearch}>Search</button>
-      {error && <p>{error}</p>}
+      <div className="search-container">
+        <input
+          type="text"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+          placeholder="Enter stock symbol"
+        />
+        <button onClick={handleSearch}>Search</button>
+      </div>
       {stockData && (
-        <div>
+        <div className="stock-info">
+          <h2>{stockData.symbol}</h2>
+          <h2 className="last-price" style={{ color: lastPriceColor }}>
+            {formatNumber(stockData.latestTrade.p)}
+          </h2>
+        </div>
+      )}
+      {error && <p className="error">{error}</p>}
+      {stockData && (
+        <div className="table-container">
           <h2>Stock Data</h2>
-          <p>Symbol: {stockData.symbol}</p>
-          <p>Last Trade Price: {stockData.latestTrade.p}</p>
-          <p>Open Price: {stockData.dailyBar.o}</p>
-          <p>High Price: {stockData.dailyBar.h}</p>
-          <p>Low Price: {stockData.dailyBar.l}</p>
-          <p>Close Price: {stockData.dailyBar.c}</p>
-          <p>Volume: {stockData.dailyBar.v}</p>
-          <p>VWAP: {stockData.dailyBar.vw}</p>
-          <p>Percent Change: {(((stockData.latestTrade.p - stockData.dailyBar.o) / stockData.dailyBar.o) * 100).toFixed(2)}%</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Symbol</td>
+                <td>{stockData.symbol}</td>
+              </tr>
+              <tr>
+                <td>Last Trade Price</td>
+                <td>{formatNumber(stockData.latestTrade.p)}</td>
+              </tr>
+              <tr>
+                <td>Open Price</td>
+                <td>{formatNumber(stockData.dailyBar.o)}</td>
+              </tr>
+              <tr>
+                <td>High Price</td>
+                <td>{formatNumber(stockData.dailyBar.h)}</td>
+              </tr>
+              <tr>
+                <td>Low Price</td>
+                <td>{formatNumber(stockData.dailyBar.l)}</td>
+              </tr>
+              <tr>
+                <td>Close Price</td>
+                <td>{formatNumber(stockData.dailyBar.c)}</td>
+              </tr>
+              <tr>
+                <td>Volume</td>
+                <td>{formatNumber(stockData.dailyBar.v)}</td>
+              </tr>
+              <tr>
+                <td>VWAP</td>
+                <td>{formatNumber(stockData.dailyBar.vw)}</td>
+              </tr>
+              <tr>
+                <td>Percent Change</td>
+                <td>{(percentChange * 100).toFixed(2)}%</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       )}
     </div>
