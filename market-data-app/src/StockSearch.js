@@ -72,7 +72,6 @@ const StockSearch = () => {
       {error && <p className="error">{error}</p>}
       {stockData && (
         <div className="table-container">
-          <h2>Stock Data</h2>
           <table>
             <thead>
               <tr>

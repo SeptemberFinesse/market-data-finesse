@@ -12,7 +12,7 @@
   }
   
   .search-container {
-    margin: 20px 0;
+    margin: 20px 0 10px 0;
   }
   
   input {
@@ -37,7 +37,6 @@
   }
   
   .stock-info {
-    /* margin-top: 10px; */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,7 +44,7 @@
   }
   
   .table-container {
-    margin-top: 20px;
+    margin-top: 10px;
   }
   
   table {
