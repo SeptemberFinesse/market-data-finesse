@@ -1,7 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFavorite } from './redux/actions';
+import { useDrag, useDrop, DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { removeFavorite, setFavorites } from './redux/actions';
 import './FavoriteStocks.css';
+
+const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite }) => {
+  const ref = React.useRef(null);
+
+  const [{ isDragging }, drag] = useDrag({
+    type: 'STOCK',
+    item: { index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [, drop] = useDrop({
+    accept: 'STOCK',
+    hover: (item) => {
+      if (item.index !== index) {
+        moveStock(item.index, index);
+        item.index = index;
+      }
+    },
+  });
+
+  drag(drop(ref));
+
+  const percentChange = ((stock.latestTrade.p - stock.dailyBar.o) / stock.dailyBar.o);
+  const lastPriceColor = percentChange > 0 ? 'green' : percentChange < 0 ? 'red' : 'grey';
+  const starIcon = 'https://www.svgrepo.com/show/13695/star.svg';
+
+  return (
+    <div
+      ref={ref}
+      className={`favorite-stock-item ${isDragging ? 'dragging' : ''}`}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+    >
+      <span className="stock-symbol">{stock.symbol}</span>
+      <img
+        src={starIcon}
+        alt="Favorite"
+        onClick={() => handleRemoveFavorite(stock.symbol)}
+        className="favorite-icon"
+      />
+      <span className="stock-price" style={{ color: lastPriceColor }}>
+        {stock.latestTrade.p.toFixed(2)}
+      </span>
+    </div>
+  );
+};
 
 const FavoriteStocks = () => {
   const favorites = useSelector((state) => state.stock.favorites);
@@ -9,24 +58,21 @@ const FavoriteStocks = () => {
   const [fadingOut, setFadingOut] = useState({});
   const [sectionFadingOut, setSectionFadingOut] = useState(false);
 
-  const formatNumber = (num) => {
-    if (num === null || num === undefined) return '-';
-    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
-
-  const getLastPriceColor = (percentChange) => {
-    if (percentChange > 0) return 'green';
-    if (percentChange < 0) return 'red';
-    return 'grey';
+  const moveStock = (fromIndex, toIndex) => {
+    const updatedFavorites = [...favorites];
+    const [movedStock] = updatedFavorites.splice(fromIndex, 1);
+    updatedFavorites.splice(toIndex, 0, movedStock);
+    dispatch(setFavorites(updatedFavorites));
   };
 
   const handleRemoveFavorite = (symbol) => {
-    // Dispatch the remove action immediately to update the state
-    dispatch(removeFavorite(symbol));
     setFadingOut((prev) => ({ ...prev, [symbol]: true }));
     if (favorites.length === 1) {
       setSectionFadingOut(true);
     }
+    setTimeout(() => {
+      dispatch(removeFavorite(symbol));
+    }, 1000); // Match the duration of the fade-out animation
   };
 
   useEffect(() => {
@@ -57,26 +103,20 @@ const FavoriteStocks = () => {
 
   return (
     favorites.length > 0 && (
-      <div id="favorite-stocks-section" className={`favorite-stocks ${sectionFadingOut ? 'fade-out' : 'fade-in'}`}>
-        <h2>Favorite Stocks</h2>
-        {favorites.map(stock => {
-          const percentChange = ((stock.latestTrade.p - stock.dailyBar.o) / stock.dailyBar.o);
-          const lastPriceColor = getLastPriceColor(percentChange);
-          const starIcon = 'https://www.svgrepo.com/show/13695/star.svg';
-          const isFadingOut = fadingOut[stock.symbol];
-          return (
-            <div
+      <DndProvider backend={HTML5Backend}>
+        <div id="favorite-stocks-section" className={`favorite-stocks ${sectionFadingOut ? 'fade-out' : 'fade-in'}`}>
+          <h2>Favorite Stocks</h2>
+          {favorites.map((stock, index) => (
+            <FavoriteStockItem
               key={stock.symbol}
-              id={`favorite-stock-${stock.symbol}`}
-              className={`favorite-stock-item ${isFadingOut ? 'fade-out' : 'fade-in'}`}
-            >
-              <span className="stock-symbol">{stock.symbol}</span>
-              <img src={starIcon} alt="Favorite" onClick={() => handleRemoveFavorite(stock.symbol)} className="favorite-icon" />
-              <span className="stock-price" style={{ color: lastPriceColor }}>{formatNumber(stock.latestTrade.p)}</span>
-            </div>
-          );
-        })}
-      </div>
+              stock={stock}
+              index={index}
+              moveStock={moveStock}
+              handleRemoveFavorite={handleRemoveFavorite}
+            />
+          ))}
+        </div>
+      </DndProvider>
     )
   );
 };
