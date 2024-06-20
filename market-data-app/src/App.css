@@ -30,7 +30,10 @@
 .favorite-content {
   display: flex;
   flex-direction: column;
-  margin-left: 20px; /* Add space between the search and favorite sections */
+  align-items: flex-start; /* Aligns the favorites to the left */
+  margin-left: 20px;
+  position: absolute; /* Makes the favorite content not affect the layout of search content */
+  left: 60%; /* Adjust this value to position the favorite stocks correctly */
 }
 
 input {
