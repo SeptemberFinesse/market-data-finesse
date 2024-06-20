@@ -1,8 +1,7 @@
-// src/StockSearch.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStockData, setError } from './redux/actions';
+import { setStockData, setError, addFavorite, removeFavorite } from './redux/actions';
 import './StockSearch.css';
 
 const StockSearch = () => {
@@ -10,6 +9,7 @@ const StockSearch = () => {
   const dispatch = useDispatch();
   const stockData = useSelector((state) => state.stock.stockData);
   const error = useSelector((state) => state.stock.error);
+  const favorites = useSelector((state) => state.stock.favorites);
 
   const fetchStockData = async (ticker) => {
     const options = {
@@ -35,6 +35,25 @@ const StockSearch = () => {
     }
   };
 
+  const handleFavorite = () => {
+    if (stockData) {
+      if (favorites.some(stock => stock.symbol === stockData.symbol)) {
+        dispatch(removeFavorite(stockData.symbol));
+      } else {
+        dispatch(addFavorite(stockData));
+      }
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const isFavorite = stockData && favorites.some(stock => stock.symbol === stockData.symbol);
+  const starIcon = isFavorite ? 'https://www.svgrepo.com/show/13695/star.svg' : 'https://www.svgrepo.com/show/172818/star-outline.svg';
+
   const formatNumber = (num) => {
     if (num === null || num === undefined) return '-';
     return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -49,11 +68,20 @@ const StockSearch = () => {
   const percentChange = stockData ? ((stockData.latestTrade.p - stockData.dailyBar.o) / stockData.dailyBar.o) : 0;
   const lastPriceColor = getLastPriceColor(percentChange);
 
+  useEffect(() => {
+    const input = document.getElementById('stock-input');
+    input.addEventListener('keypress', handleKeyPress);
+    return () => {
+      input.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [symbol]);
+
   return (
     <div className="container">
       <h1>Stock Search</h1>
       <div className="search-container">
         <input
+          id="stock-input"
           type="text"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
@@ -63,6 +91,7 @@ const StockSearch = () => {
       </div>
       {stockData && (
         <div className="stock-info">
+          <img src={starIcon} alt="Favorite" onClick={handleFavorite} className="favorite-icon" />
           <h2>{stockData.symbol}</h2>
           <h2 className="last-price" style={{ color: lastPriceColor }}>
             {formatNumber(stockData.latestTrade.p)}

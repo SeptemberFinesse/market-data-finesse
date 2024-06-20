@@ -1,9 +1,10 @@
 import { combineReducers } from 'redux';
-import { SET_STOCK_DATA, SET_ERROR } from './actions';
+import { SET_STOCK_DATA, SET_ERROR, ADD_FAVORITE, REMOVE_FAVORITE } from './actions';
 
 const initialState = {
   stockData: null,
   error: '',
+  favorites: [],
 };
 
 const stockReducer = (state = initialState, action) => {
@@ -12,6 +13,10 @@ const stockReducer = (state = initialState, action) => {
       return { ...state, stockData: action.payload, error: '' };
     case SET_ERROR:
       return { ...state, error: action.payload, stockData: null };
+    case ADD_FAVORITE:
+      return { ...state, favorites: [...state.favorites, action.payload] };
+    case REMOVE_FAVORITE:
+      return { ...state, favorites: state.favorites.filter(stock => stock.symbol !== action.payload) };
     default:
       return state;
   }

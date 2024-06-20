@@ -14,6 +14,28 @@
   color: white;
 }
 
+.search-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+}
+
+.favorite-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  visibility: hidden;
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+}
+
 input {
   padding: 10px;
   margin: 10px;
@@ -32,4 +54,8 @@ p {
 
 h2 {
   margin-top: 20px;
+}
+
+.favorite-stocks {
+  visibility: visible;
 }

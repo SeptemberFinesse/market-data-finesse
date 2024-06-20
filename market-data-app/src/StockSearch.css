@@ -77,3 +77,9 @@
     font-size: 32px;
   }
   
+   .favorite-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+  
