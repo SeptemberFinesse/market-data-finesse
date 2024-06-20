@@ -21,6 +21,8 @@ const FavoriteStocks = () => {
   };
 
   const handleRemoveFavorite = (symbol) => {
+    // Dispatch the remove action immediately to update the state
+    dispatch(removeFavorite(symbol));
     setFadingOut((prev) => ({ ...prev, [symbol]: true }));
     if (favorites.length === 1) {
       setSectionFadingOut(true);
@@ -29,7 +31,6 @@ const FavoriteStocks = () => {
 
   useEffect(() => {
     const handleAnimationEnd = (symbol) => {
-      dispatch(removeFavorite(symbol));
       setFadingOut((prev) => {
         const newState = { ...prev };
         delete newState[symbol];
@@ -43,7 +44,7 @@ const FavoriteStocks = () => {
         element.addEventListener('animationend', () => handleAnimationEnd(symbol));
       }
     });
-  }, [fadingOut, dispatch]);
+  }, [fadingOut]);
 
   useEffect(() => {
     if (sectionFadingOut && favorites.length === 0) {
