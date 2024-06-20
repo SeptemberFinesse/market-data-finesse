@@ -5,7 +5,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { removeFavorite, setFavorites } from './redux/actions';
 import './FavoriteStocks.css';
 
-const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite }) => {
+const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDrop }) => {
   const ref = React.useRef(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -14,6 +14,9 @@ const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite }) =>
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: () => {
+      onDrop(index);
+    },
   });
 
   const [, drop] = useDrop({
@@ -31,6 +34,7 @@ const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite }) =>
   const percentChange = ((stock.latestTrade.p - stock.dailyBar.o) / stock.dailyBar.o);
   const lastPriceColor = percentChange > 0 ? 'green' : percentChange < 0 ? 'red' : 'grey';
   const starIcon = 'https://www.svgrepo.com/show/13695/star.svg';
+  const moveIcon = 'https://www.svgrepo.com/show/532195/menu.svg';
 
   return (
     <div
@@ -38,6 +42,7 @@ const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite }) =>
       className={`favorite-stock-item ${isDragging ? 'dragging' : ''}`}
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
+      <img src={moveIcon} alt="Move" className="move-icon" />
       <span className="stock-symbol">{stock.symbol}</span>
       <img
         src={starIcon}
@@ -57,6 +62,7 @@ const FavoriteStocks = () => {
   const dispatch = useDispatch();
   const [fadingOut, setFadingOut] = useState({});
   const [sectionFadingOut, setSectionFadingOut] = useState(false);
+  const [shakingIndex, setShakingIndex] = useState(null);
 
   const moveStock = (fromIndex, toIndex) => {
     const updatedFavorites = [...favorites];
@@ -73,6 +79,13 @@ const FavoriteStocks = () => {
     setTimeout(() => {
       dispatch(removeFavorite(symbol));
     }, 1000); // Match the duration of the fade-out animation
+  };
+
+  const handleDrop = (index) => {
+    setShakingIndex(index);
+    setTimeout(() => {
+      setShakingIndex(null);
+    }, 500); // Duration of the shake animation
   };
 
   useEffect(() => {
@@ -113,6 +126,8 @@ const FavoriteStocks = () => {
               index={index}
               moveStock={moveStock}
               handleRemoveFavorite={handleRemoveFavorite}
+              onDrop={handleDrop}
+              className={shakingIndex === index ? 'shake' : ''}
             />
           ))}
         </div>
