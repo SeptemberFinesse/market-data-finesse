@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useDrag, useDrop, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { removeFavorite, setFavorites, addFavorite } from './redux/actions';
+import { removeFavorite, setFavorites } from './redux/actions';
 import './FavoriteStocks.css';
 
 const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDrop }) => {
@@ -75,7 +75,12 @@ const FavoriteStocks = () => {
     setFadingOut((prev) => ({ ...prev, [symbol]: true }));
     setTimeout(() => {
       dispatch(removeFavorite(symbol));
-    }, 300); // Shortened fade-out animation
+      setFadingOut((prev) => {
+        const newState = { ...prev };
+        delete newState[symbol];
+        return newState;
+      });
+    }, 300); // Match the duration of the fade-out animation
   };
 
   const handleDrop = (index) => {
@@ -86,21 +91,13 @@ const FavoriteStocks = () => {
   };
 
   useEffect(() => {
-    const handleAnimationEnd = (symbol) => {
-      setFadingOut((prev) => {
-        const newState = { ...prev };
-        delete newState[symbol];
-        return newState;
-      });
-    };
-
-    Object.keys(fadingOut).forEach((symbol) => {
-      const element = document.getElementById(`favorite-stock-${symbol}`);
-      if (element) {
-        element.addEventListener('animationend', () => handleAnimationEnd(symbol));
+    if (sectionFadingOut && favorites.length === 0) {
+      const sectionElement = document.getElementById('favorite-stocks-section');
+      if (sectionElement) {
+        sectionElement.addEventListener('animationend', () => setSectionFadingOut(false));
       }
-    });
-  }, [fadingOut]);
+    }
+  }, [sectionFadingOut, favorites.length]);
 
   return (
     favorites.length > 0 && (

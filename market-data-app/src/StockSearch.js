@@ -126,7 +126,7 @@ const StockSearch = () => {
                 <td>{formatNumber(stockData.dailyBar.h)}</td>
               </tr>
               <tr>
-                <td>Low Price</td>
+                <td>Low Price}</td>
                 <td>{formatNumber(stockData.dailyBar.l)}</td>
               </tr>
               <tr>

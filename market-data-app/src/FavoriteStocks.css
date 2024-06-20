@@ -2,14 +2,6 @@
     margin-left: 20px;
   }
   
-  .favorite-stocks.fade-in {
-    animation: fadeIn 0.5s forwards;
-  }
-  
-  .favorite-stocks.fade-out {
-    animation: fadeOut 0.3s forwards;
-  }
-  
   .favorite-stocks h2 {
     font-size: 24px;
     margin-bottom: 10px;
