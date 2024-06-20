@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useDrag, useDrop, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { removeFavorite, setFavorites } from './redux/actions';
+import { removeFavorite, setFavorites, addFavorite } from './redux/actions';
 import './FavoriteStocks.css';
 
 const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDrop }) => {
@@ -73,12 +73,9 @@ const FavoriteStocks = () => {
 
   const handleRemoveFavorite = (symbol) => {
     setFadingOut((prev) => ({ ...prev, [symbol]: true }));
-    if (favorites.length === 1) {
-      setSectionFadingOut(true);
-    }
     setTimeout(() => {
       dispatch(removeFavorite(symbol));
-    }, 1000); // Match the duration of the fade-out animation
+    }, 300); // Shortened fade-out animation
   };
 
   const handleDrop = (index) => {
@@ -105,30 +102,22 @@ const FavoriteStocks = () => {
     });
   }, [fadingOut]);
 
-  useEffect(() => {
-    if (sectionFadingOut && favorites.length === 0) {
-      const sectionElement = document.getElementById('favorite-stocks-section');
-      if (sectionElement) {
-        sectionElement.addEventListener('animationend', () => setSectionFadingOut(false));
-      }
-    }
-  }, [sectionFadingOut, favorites.length]);
-
   return (
     favorites.length > 0 && (
       <DndProvider backend={HTML5Backend}>
-        <div id="favorite-stocks-section" className={`favorite-stocks ${sectionFadingOut ? 'fade-out' : 'fade-in'}`}>
+        <div id="favorite-stocks-section" className="favorite-stocks">
           <h2>Favorite Stocks</h2>
           {favorites.map((stock, index) => (
-            <FavoriteStockItem
-              key={stock.symbol}
-              stock={stock}
-              index={index}
-              moveStock={moveStock}
-              handleRemoveFavorite={handleRemoveFavorite}
-              onDrop={handleDrop}
-              className={shakingIndex === index ? 'shake' : ''}
-            />
+            <div key={stock.symbol} id={`favorite-stock-${stock.symbol}`} className={`favorite-stock-item-container ${fadingOut[stock.symbol] ? 'fade-out' : 'fade-in'}`}>
+              <FavoriteStockItem
+                stock={stock}
+                index={index}
+                moveStock={moveStock}
+                handleRemoveFavorite={handleRemoveFavorite}
+                onDrop={handleDrop}
+                className={shakingIndex === index ? 'shake' : ''}
+              />
+            </div>
           ))}
         </div>
       </DndProvider>

@@ -10,7 +10,6 @@ const StockSearch = () => {
   const stockData = useSelector((state) => state.stock.stockData);
   const error = useSelector((state) => state.stock.error);
   const favorites = useSelector((state) => state.stock.favorites);
-  const [isFadingOut, setIsFadingOut] = useState(false);
 
   const fetchStockData = async (ticker) => {
     const options = {
@@ -40,10 +39,6 @@ const StockSearch = () => {
     if (stockData) {
       if (favorites.some(stock => stock.symbol === stockData.symbol)) {
         dispatch(removeFavorite(stockData.symbol));
-        setIsFadingOut(true);
-        setTimeout(() => {
-          setIsFadingOut(false);
-        }, 1000); // Match the duration of the fade-out animation
       } else {
         dispatch(addFavorite(stockData));
       }
@@ -57,7 +52,7 @@ const StockSearch = () => {
   };
 
   const isFavorite = stockData && favorites.some(stock => stock.symbol === stockData.symbol);
-  const starIcon = isFavorite && !isFadingOut ? 'https://www.svgrepo.com/show/13695/star.svg' : 'https://www.svgrepo.com/show/172818/star-outline.svg';
+  const starIcon = isFavorite ? 'https://www.svgrepo.com/show/13695/star.svg' : 'https://www.svgrepo.com/show/172818/star-outline.svg';
 
   const formatNumber = (num) => {
     if (num === null || num === undefined) return '-';
@@ -96,7 +91,7 @@ const StockSearch = () => {
       </div>
       {stockData && (
         <div className="stock-info">
-          <img src={starIcon} alt="Favorite" onClick={handleFavorite} className={`favorite-icon ${isFadingOut ? 'fade-out' : ''}`} />
+          <img src={starIcon} alt="Favorite" onClick={handleFavorite} className="favorite-icon" />
           <h2>{stockData.symbol}</h2>
           <h2 className="last-price" style={{ color: lastPriceColor }}>
             {formatNumber(stockData.latestTrade.p)}
