@@ -14,26 +14,23 @@
   color: white;
 }
 
+.content {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
 .search-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 50%;
 }
 
 .favorite-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
-  visibility: hidden;
-}
-
-.content {
-  display: flex;
-  flex-direction: row;
+  margin-left: 20px; /* Add space between the search and favorite sections */
 }
 
 input {
