@@ -4,8 +4,9 @@ import { useDrag, useDrop, DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { removeFavorite, setFavorites } from './redux/actions';
 import './FavoriteStocks.css';
+import axios from 'axios';
 
-const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDrop }) => {
+const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDrop, displayMode, toggleDisplayMode, fadeInOutClass }) => {
   const ref = React.useRef(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -36,6 +37,8 @@ const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDr
   const starIcon = 'https://www.svgrepo.com/show/13695/star.svg';
   const moveIcon = 'https://www.svgrepo.com/show/532195/menu.svg';
 
+  const displayValue = displayMode === 'lastPrice' ? stock.latestTrade.p.toFixed(2) : (percentChange * 100).toFixed(2) + '%';
+
   return (
     <div
       ref={ref}
@@ -50,8 +53,12 @@ const FavoriteStockItem = ({ stock, index, moveStock, handleRemoveFavorite, onDr
         onClick={() => handleRemoveFavorite(stock.symbol)}
         className="favorite-icon"
       />
-      <span className="stock-price" style={{ color: lastPriceColor }}>
-        {stock.latestTrade.p.toFixed(2)}
+      <span
+        className={`stock-price ${fadeInOutClass}`}
+        style={{ color: lastPriceColor, cursor: 'pointer' }}
+        onClick={() => toggleDisplayMode(stock.symbol)}
+      >
+        {displayValue}
       </span>
     </div>
   );
@@ -63,6 +70,46 @@ const FavoriteStocks = () => {
   const [fadingOut, setFadingOut] = useState({});
   const [sectionFadingOut, setSectionFadingOut] = useState(false);
   const [shakingIndex, setShakingIndex] = useState(null);
+  const [displayModes, setDisplayModes] = useState({});
+  const [fadeInOutClass, setFadeInOutClass] = useState('');
+
+  const fetchData = async (symbol) => {
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        'APCA-API-KEY-ID': 'AK0WIW77OAZ5YHWA12OV',
+        'APCA-API-SECRET-KEY': '76Wc63zbHbmDdzeDSBErhFNfbOB9F2SWUd7QjhC4'
+      }
+    };
+    try {
+      const response = await axios.get(`https://data.alpaca.markets/v2/stocks/${symbol}/snapshot`, options);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching stock data', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (favorites.length > 0) {
+        setFadeInOutClass('fade-in-out'); // Add the fade-in-out class
+        const updatedFavorites = await Promise.all(
+          favorites.map(async (stock) => {
+            const updatedData = await fetchData(stock.symbol);
+            return updatedData ? { ...stock, ...updatedData } : stock;
+          })
+        );
+        dispatch(setFavorites(updatedFavorites));
+        setTimeout(() => {
+          setFadeInOutClass(''); // Remove the fade-in-out class after animation
+        }, 1900);
+      }
+    }, 1900);
+
+    return () => clearInterval(interval);
+  }, [favorites, dispatch]);
 
   const moveStock = (fromIndex, toIndex) => {
     const updatedFavorites = [...favorites];
@@ -90,6 +137,13 @@ const FavoriteStocks = () => {
     }, 500); // Duration of the shake animation
   };
 
+  const toggleDisplayMode = (symbol) => {
+    setDisplayModes((prevModes) => ({
+      ...prevModes,
+      [symbol]: prevModes[symbol] === 'lastPrice' ? 'percentChange' : 'lastPrice',
+    }));
+  };
+
   useEffect(() => {
     if (sectionFadingOut && favorites.length === 0) {
       const sectionElement = document.getElementById('favorite-stocks-section');
@@ -112,6 +166,9 @@ const FavoriteStocks = () => {
                 moveStock={moveStock}
                 handleRemoveFavorite={handleRemoveFavorite}
                 onDrop={handleDrop}
+                displayMode={displayModes[stock.symbol] || 'lastPrice'}
+                toggleDisplayMode={toggleDisplayMode}
+                fadeInOutClass={fadeInOutClass}
                 className={shakingIndex === index ? 'shake' : ''}
               />
             </div>

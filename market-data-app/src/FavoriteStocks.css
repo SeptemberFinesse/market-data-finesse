@@ -1,88 +1,101 @@
 .favorite-stocks {
-    margin-left: 20px;
+  margin-left: 20px;
+}
+
+.favorite-stocks h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.favorite-stock-item-container {
+  opacity: 0;
+}
+
+.favorite-stock-item-container.fade-in {
+  animation: fadeIn 0.5s forwards;
+}
+
+.favorite-stock-item-container.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+.favorite-stock-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  background-color: #34495e;
+  padding: 10px;
+  border-radius: 5px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.favorite-stock-item.dragging {
+  transform: scale(1.05);
+  opacity: 0.5;
+}
+
+.favorite-stock-item.shake {
+  animation: shake 0.5s;
+}
+
+.move-icon {
+  width: 24px;
+  height: 24px;
+  cursor: grab;
+  margin-right: 10px;
+}
+
+.stock-symbol {
+  flex: 1;
+  text-align: left;
+  min-width: 100px;
+}
+
+.favorite-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: opacity 0.3s;
+}
+
+.favorite-icon.fade-out {
+  opacity: 0;
+}
+
+.stock-price {
+  flex: 1;
+  text-align: right;
+  min-width: 100px;
+  cursor: pointer; /* Indicate that the stock price is clickable */
+}
+
+.fade-in-out {
+  animation: fadeInOut 1.9s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 1;
   }
-  
-  .favorite-stocks h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-  
-  .favorite-stock-item-container {
+  50% {
     opacity: 0;
   }
-  
-  .favorite-stock-item-container.fade-in {
-    animation: fadeIn 0.5s forwards;
-  }
-  
-  .favorite-stock-item-container.fade-out {
-    animation: fadeOut 0.3s forwards;
-  }
-  
-  .favorite-stock-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    background-color: #34495e;
-    padding: 10px;
-    border-radius: 5px;
-    transition: transform 0.2s, opacity 0.2s;
-  }
-  
-  .favorite-stock-item.dragging {
-    transform: scale(1.05);
-    opacity: 0.5;
-  }
-  
-  .favorite-stock-item.shake {
-    animation: shake 0.5s;
-  }
-  
-  .move-icon {
-    width: 24px;
-    height: 24px;
-    cursor: grab;
-    margin-right: 10px;
-  }
-  
-  .stock-symbol {
-    flex: 1;
-    text-align: left;
-    min-width: 100px;
-  }
-  
-  .favorite-icon {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    margin-left: 10px;
-    transition: opacity 0.3s;
-  }
-  
-  .favorite-icon.fade-out {
-    opacity: 0;
-  }
-  
-  .stock-price {
-    flex: 1;
-    text-align: right;
-    min-width: 100px;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-20px); }
-    20%, 40%, 60%, 80% { transform: translateX(20px); }
-  }
-  
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-20px); }
+  20%, 40%, 60%, 80% { transform: translateX(20px); }
+}

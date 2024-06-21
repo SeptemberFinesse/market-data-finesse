@@ -6,6 +6,7 @@ import './StockSearch.css';
 
 const StockSearch = () => {
   const [symbol, setSymbol] = useState('');
+  const [fadeInOutClass, setFadeInOutClass] = useState('');
   const dispatch = useDispatch();
   const stockData = useSelector((state) => state.stock.stockData);
   const error = useSelector((state) => state.stock.error);
@@ -28,6 +29,20 @@ const StockSearch = () => {
       dispatch(setError('Failed to fetch data. Please try again.'));
     }
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (stockData) {
+        setFadeInOutClass('fade-in-out'); // Add the fade-in-out class
+        fetchStockData(stockData.symbol);
+        setTimeout(() => {
+          setFadeInOutClass(''); // Remove the fade-in-out class after animation
+        }, 1900);
+      }
+    }, 1900);
+
+    return () => clearInterval(interval);
+  }, [stockData, dispatch]);
 
   const handleSearch = () => {
     if (symbol) {
@@ -93,7 +108,7 @@ const StockSearch = () => {
         <div className="stock-info">
           <img src={starIcon} alt="Favorite" onClick={handleFavorite} className="favorite-icon" />
           <h2>{stockData.symbol}</h2>
-          <h2 className="last-price" style={{ color: lastPriceColor }}>
+          <h2 className={`last-price ${fadeInOutClass}`} style={{ color: lastPriceColor }}>
             {formatNumber(stockData.latestTrade.p)}
           </h2>
         </div>
@@ -115,35 +130,35 @@ const StockSearch = () => {
               </tr>
               <tr>
                 <td>Last Trade Price</td>
-                <td>{formatNumber(stockData.latestTrade.p)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.latestTrade.p)}</td>
               </tr>
               <tr>
                 <td>Open Price</td>
-                <td>{formatNumber(stockData.dailyBar.o)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.o)}</td>
               </tr>
               <tr>
                 <td>High Price</td>
-                <td>{formatNumber(stockData.dailyBar.h)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.h)}</td>
               </tr>
               <tr>
-                <td>Low Price}</td>
-                <td>{formatNumber(stockData.dailyBar.l)}</td>
+                <td>Low Price</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.l)}</td>
               </tr>
               <tr>
                 <td>Close Price</td>
-                <td>{formatNumber(stockData.dailyBar.c)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.c)}</td>
               </tr>
               <tr>
                 <td>Volume</td>
-                <td>{formatNumber(stockData.dailyBar.v)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.v)}</td>
               </tr>
               <tr>
                 <td>VWAP</td>
-                <td>{formatNumber(stockData.dailyBar.vw)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.vw)}</td>
               </tr>
               <tr>
                 <td>Percent Change</td>
-                <td>{(percentChange * 100).toFixed(2)}%</td>
+                <td className={fadeInOutClass}>{(percentChange * 100).toFixed(2)}%</td>
               </tr>
             </tbody>
           </table>
