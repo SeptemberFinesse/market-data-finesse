@@ -1,5 +1,7 @@
+/* FavoriteStocks.css */
 .favorite-stocks {
-  margin-left: 20px;
+  margin-left: 8em; /* Adjust margin to prevent overlap */
+  margin-top: 9em;
 }
 
 .favorite-stocks h2 {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStockData, setError, addFavorite, removeFavorite } from './redux/actions';
+import { setStockData, setError, addFavorite, removeFavorite, setFavorites } from './redux/actions';
 import './StockSearch.css';
 
 const StockSearch = () => {
@@ -25,24 +25,54 @@ const StockSearch = () => {
     try {
       const response = await axios.get(`https://data.alpaca.markets/v2/stocks/${ticker}/snapshot`, options);
       dispatch(setStockData(response.data));
+      setTimeout(() => {
+        setFadeInOutClass('fade-in-out'); // Trigger fade effect on table values
+        setTimeout(() => {
+          setFadeInOutClass(''); // Remove the fade effect class after the transition
+        }, 1000);
+      }, 100);
     } catch (err) {
       dispatch(setError('Failed to fetch data. Please try again.'));
     }
   };
 
+  const fetchFavoritesData = async () => {
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        'APCA-API-KEY-ID': 'PKD29JZU7SWDFPTUPY2Z',
+        'APCA-API-SECRET-KEY': 'wNoZ8NWaLuoh7IUfSXSr8Z4YgUlXa2aEJRlnulvf'
+      }
+    };
+
+    const updatedFavorites = await Promise.all(
+      favorites.map(async (stock) => {
+        try {
+          const response = await axios.get(`https://data.alpaca.markets/v2/stocks/${stock.symbol}/snapshot`, options);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching stock data', error);
+          return stock;
+        }
+      })
+    );
+
+    dispatch(setFavorites(updatedFavorites));
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (stockData) {
-        setFadeInOutClass('fade-in-out'); // Add the fade-in-out class
         fetchStockData(stockData.symbol);
-        setTimeout(() => {
-          setFadeInOutClass(''); // Remove the fade-in-out class after animation
-        }, 1900);
+      }
+      if (favorites.length > 0) {
+        fetchFavoritesData();
       }
     }, 1900);
 
     return () => clearInterval(interval);
-  }, [stockData, dispatch]);
+  }, [stockData, favorites, dispatch]);
 
   const handleSearch = () => {
     if (symbol) {
@@ -119,46 +149,22 @@ const StockSearch = () => {
           <table>
             <thead>
               <tr>
-                <th>Field</th>
-                <th>Value</th>
+                <th>Symbol</th>
+                <th>Last Trade Price</th>
+                <th>Percent Change</th>
+                <th>Open Price</th>
+                <th>Close Price</th>
+                <th>Volume</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Symbol</td>
                 <td>{stockData.symbol}</td>
-              </tr>
-              <tr>
-                <td>Last Trade Price</td>
                 <td className={fadeInOutClass}>{formatNumber(stockData.latestTrade.p)}</td>
-              </tr>
-              <tr>
-                <td>Open Price</td>
-                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.o)}</td>
-              </tr>
-              <tr>
-                <td>High Price</td>
-                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.h)}</td>
-              </tr>
-              <tr>
-                <td>Low Price</td>
-                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.l)}</td>
-              </tr>
-              <tr>
-                <td>Close Price</td>
-                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.c)}</td>
-              </tr>
-              <tr>
-                <td>Volume</td>
-                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.v)}</td>
-              </tr>
-              <tr>
-                <td>VWAP</td>
-                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.vw)}</td>
-              </tr>
-              <tr>
-                <td>Percent Change</td>
                 <td className={fadeInOutClass}>{(percentChange * 100).toFixed(2)}%</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.o)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.c)}</td>
+                <td className={fadeInOutClass}>{formatNumber(stockData.dailyBar.v)}</td>
               </tr>
             </tbody>
           </table>
