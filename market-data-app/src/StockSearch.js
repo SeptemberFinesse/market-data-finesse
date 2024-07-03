@@ -17,8 +17,8 @@ const StockSearch = () => {
       method: 'GET',
       headers: {
         accept: 'application/json',
-        'APCA-API-KEY-ID': 'AK0WIW77OAZ5YHWA12OV',
-        'APCA-API-SECRET-KEY': '76Wc63zbHbmDdzeDSBErhFNfbOB9F2SWUd7QjhC4'
+        'APCA-API-KEY-ID': 'PKD29JZU7SWDFPTUPY2Z',
+        'APCA-API-SECRET-KEY': 'wNoZ8NWaLuoh7IUfSXSr8Z4YgUlXa2aEJRlnulvf'
       }
     };
 
